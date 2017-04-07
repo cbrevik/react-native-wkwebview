@@ -206,6 +206,10 @@ var WKWebView = React.createClass({
      * A Boolean value that determines whether paging is enabled for the scroll view.
     */
     pagingEnabled: PropTypes.bool,
+
+    onOverrideUrlLoading: PropTypes.func,
+
+    allowedUrls: PropTypes.array
   },
   getInitialState() {
     return {
@@ -286,6 +290,7 @@ var WKWebView = React.createClass({
         onMessage={this._onMessage}
         onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
         pagingEnabled={this.props.pagingEnabled}
+        {...this.props.nativeComponentProps}
       />;
 
     return (

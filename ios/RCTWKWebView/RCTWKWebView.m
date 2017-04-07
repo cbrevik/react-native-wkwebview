@@ -19,6 +19,8 @@
 @property (nonatomic, copy) RCTDirectEventBlock onShouldStartLoadWithRequest;
 @property (nonatomic, copy) RCTDirectEventBlock onProgress;
 @property (nonatomic, copy) RCTDirectEventBlock onMessage;
+@property (nonatomic, copy) RCTDirectEventBlock onOverrideUrlLoading;
+
 @property (assign) BOOL sendCookies;
 
 @end
@@ -264,6 +266,27 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
     decisionHandler(WKNavigationActionPolicyCancel);
   }
   else {
+    if (_allowedUrls && _allowedUrls.count > 0)
+    {
+      NSString* url = request.URL.absoluteString;
+      if (url) {
+        for (NSString *allowedUrl in _allowedUrls) {
+          NSPredicate *rule = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", allowedUrl];
+
+          if ([rule evaluateWithObject:url]) {
+            return decisionHandler(WKNavigationActionPolicyAllow);
+          }
+        }
+
+        if (_onOverrideUrlLoading) {
+          NSMutableDictionary<NSString *, id> *event = [[NSMutableDictionary alloc] initWithDictionary:@{ @"url": url ?: @"" }];
+          _onOverrideUrlLoading(event);
+        }
+
+        return decisionHandler(WKNavigationActionPolicyCancel);
+      }
+    }
+    
     decisionHandler(WKNavigationActionPolicyAllow);
   }
 }
