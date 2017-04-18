@@ -31,6 +31,8 @@
   NSString *_injectedJavaScript;
 }
 
+static WKProcessPool * _sharedProcessPool;
+
 - (instancetype)initWithFrame:(CGRect)frame
 {
   if ((self = [super initWithFrame:frame])) {
@@ -42,8 +44,11 @@
     WKWebViewConfiguration* config = [[WKWebViewConfiguration alloc] init];
     WKUserContentController* userController = [[WKUserContentController alloc]init];
     [userController addScriptMessageHandler:self name:@"reactNative"];
+    if (_sharedProcessPool == nil) {
+      _sharedProcessPool = [[WKProcessPool alloc] init];
+    }
+    config.processPool = _sharedProcessPool;
     config.userContentController = userController;
-    
     _webView = [[WKWebView alloc] initWithFrame:self.bounds configuration:config];
     _webView.UIDelegate = self;
     _webView.navigationDelegate = self;
